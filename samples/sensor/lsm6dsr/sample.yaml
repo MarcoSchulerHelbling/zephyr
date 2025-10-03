@@ -1,10 +1,10 @@
 sample:
-  name: LSM6DSL accelerometer and gyrometer sensor
+  name: LSM6DSR accelerometer and gyrometer sensor
 tests:
-  sample.sensor.lsm6dsl:
+  sample.sensor.lsm6dsr:
     harness: console
     tags: sensors
-    depends_on: lsm6dsl
+    depends_on: lsm6dsr
     timeout: 15
     harness_config:
       type: multi_line
