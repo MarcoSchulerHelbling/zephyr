@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 description: |
-  STMicroelectronics LSM6DSL 6-axis accelerometer and gyrometer accessed through
+  STMicroelectronics LSM6DSR 6-axis accelerometer and gyrometer accessed through
   SPI bus
 
-compatible: "st,lsm6dsl"
+compatible: "st,lsm6dsr"
 
-include: ["spi-device.yaml", "st,lsm6dsl-common.yaml"]
+include: ["spi-device.yaml", "st,lsm6dsr-common.yaml"]
