@@ -1,90 +1,90 @@
-# LSM6DSL accelerometer and gyroscope sensor configuration
+# LSM6DSR accelerometer and gyroscope sensor configuration
 # options
 
 # Copyright (c) 2017 Linaro Limited
 # SPDX-License-Identifier: Apache-2.0
 
-menuconfig LSM6DSL
-	bool "LSM6DSL I2C/SPI accelerometer and gyroscope Chip"
+menuconfig LSM6DSR
+	bool "LSM6DSR I2C/SPI accelerometer and gyroscope Chip"
 	default y
-	depends on DT_HAS_ST_LSM6DSL_ENABLED
-	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_ST_LSM6DSL),i2c)
-	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_ST_LSM6DSL),spi)
+	depends on DT_HAS_ST_LSM6DSR_ENABLED
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_ST_LSM6DSR),i2c)
+	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_ST_LSM6DSR),spi)
 	help
-	  Enable driver for LSM6DSL accelerometer and gyroscope
+	  Enable driver for LSM6DSR accelerometer and gyroscope
 	  sensor.
 
-if LSM6DSL
+if LSM6DSR
 
-choice LSM6DSL_TRIGGER_MODE
+choice LSM6DSR_TRIGGER_MODE
 	prompt "Trigger mode"
 	help
 	  Specify the type of triggering to be used by the driver.
 
-config LSM6DSL_TRIGGER_NONE
+config LSM6DSR_TRIGGER_NONE
 	bool "No trigger"
 
-config LSM6DSL_TRIGGER_GLOBAL_THREAD
+config LSM6DSR_TRIGGER_GLOBAL_THREAD
 	bool "Use global thread"
 	depends on GPIO
-	depends on $(dt_compat_any_has_prop,$(DT_COMPAT_ST_LSM6DSL),irq-gpios)
-	select LSM6DSL_TRIGGER
+	depends on $(dt_compat_any_has_prop,$(DT_COMPAT_ST_LSM6DSR),irq-gpios)
+	select LSM6DSR_TRIGGER
 
-config LSM6DSL_TRIGGER_OWN_THREAD
+config LSM6DSR_TRIGGER_OWN_THREAD
 	bool "Use own thread"
 	depends on GPIO
-	depends on $(dt_compat_any_has_prop,$(DT_COMPAT_ST_LSM6DSL),irq-gpios)
-	select LSM6DSL_TRIGGER
+	depends on $(dt_compat_any_has_prop,$(DT_COMPAT_ST_LSM6DSR),irq-gpios)
+	select LSM6DSR_TRIGGER
 
 endchoice
 
-config LSM6DSL_TRIGGER
+config LSM6DSR_TRIGGER
 	bool
 
-config LSM6DSL_THREAD_PRIORITY
+config LSM6DSR_THREAD_PRIORITY
 	int "Thread priority"
-	depends on LSM6DSL_TRIGGER_OWN_THREAD
+	depends on LSM6DSR_TRIGGER_OWN_THREAD
 	default 10
 	help
 	  Priority of thread used by the driver to handle interrupts.
 
-config LSM6DSL_THREAD_STACK_SIZE
+config LSM6DSR_THREAD_STACK_SIZE
 	int "Thread stack size"
-	depends on LSM6DSL_TRIGGER_OWN_THREAD
+	depends on LSM6DSR_TRIGGER_OWN_THREAD
 	default 1024
 	help
 	  Stack size of thread used by the driver to handle interrupts.
 
-config LSM6DSL_ENABLE_TEMP
+config LSM6DSR_ENABLE_TEMP
 	bool "Temperature"
 	help
 	  Enable/disable temperature
 
-config LSM6DSL_SENSORHUB
+config LSM6DSR_SENSORHUB
 	bool "I2C sensorhub feature"
 	help
 	  Enable/disable internal sensorhub
 
-choice LSM6DSL_EXTERNAL_SENSOR_0
+choice LSM6DSR_EXTERNAL_SENSOR_0
 	prompt "External sensor 0"
-	depends on LSM6DSL_SENSORHUB
+	depends on LSM6DSR_SENSORHUB
 	help
 	  Choose the external sensor 0 connected to LSM6DS3.
 
-config LSM6DSL_EXT0_LIS2MDL
+config LSM6DSR_EXT0_LIS2MDL
 	bool "LIS2MDL"
 
-config LSM6DSL_EXT0_LIS3MDL
+config LSM6DSR_EXT0_LIS3MDL
 	bool "LIS3MDL"
 
-config LSM6DSL_EXT0_LPS22HB
+config LSM6DSR_EXT0_LPS22HB
 	bool "LPS22HB"
 
 endchoice
 
 menu "Attributes"
 
-config LSM6DSL_GYRO_FS
+config LSM6DSR_GYRO_FS
 	int "Gyroscope full-scale range"
 	default 0
 	help
@@ -98,7 +98,7 @@ config LSM6DSL_GYRO_FS
 	  1000:  +/- 1000dps
 	  2000:  +/- 2000dps
 
-config LSM6DSL_GYRO_ODR
+config LSM6DSR_GYRO_ODR
 	int "Gyroscope Output data rate frequency"
 	range 0 10
 	default 0
@@ -117,7 +117,7 @@ config LSM6DSL_GYRO_ODR
 	  9: 3330Hz
 	  10: 6660Hz
 
-config LSM6DSL_ACCEL_FS
+config LSM6DSR_ACCEL_FS
 	int "Accelerometer full-scale range"
 	default 0
 	help
@@ -130,7 +130,7 @@ config LSM6DSL_ACCEL_FS
 	  8:  +/- 8g
 	  16: +/- 16g
 
-config LSM6DSL_ACCEL_ODR
+config LSM6DSR_ACCEL_ODR
 	int "Accelerometer Output data rate frequency"
 	range 0 11
 	default 0
@@ -151,4 +151,4 @@ config LSM6DSL_ACCEL_ODR
 	  11: 1.6Hz
 endmenu
 
-endif # LSM6DSL
+endif # LSM6DSR
