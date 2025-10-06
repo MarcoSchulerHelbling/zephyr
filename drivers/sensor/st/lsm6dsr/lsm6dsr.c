@@ -360,25 +360,6 @@ static int lsm6dsr_sample_fetch_gyro(const struct device *dev)
 	return 0;
 }
 
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-static int lsm6dsr_sample_fetch_temp(const struct device *dev)
-{
-	struct lsm6dsr_data *data = dev->data;
-	uint8_t buf[2];
-
-	if (data->hw_tf->read_data(dev, LSM6DSR_REG_OUT_TEMP_L,
-				   buf, sizeof(buf)) < 0) {
-		LOG_DBG("failed to read sample");
-		return -EIO;
-	}
-
-	data->temp_sample = (int16_t)((uint16_t)(buf[0]) |
-				((uint16_t)(buf[1]) << 8));
-
-	return 0;
-}
-#endif
-
 static int lsm6dsr_sample_fetch(const struct device *dev,
 				enum sensor_channel chan)
 {
@@ -389,17 +370,9 @@ static int lsm6dsr_sample_fetch(const struct device *dev,
 	case SENSOR_CHAN_GYRO_XYZ:
 		lsm6dsr_sample_fetch_gyro(dev);
 		break;
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-	case SENSOR_CHAN_DIE_TEMP:
-		lsm6dsr_sample_fetch_temp(dev);
-		break;
-#endif
 	case SENSOR_CHAN_ALL:
 		lsm6dsr_sample_fetch_accel(dev);
 		lsm6dsr_sample_fetch_gyro(dev);
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-		lsm6dsr_sample_fetch_temp(dev);
-#endif
 		break;
 	default:
 		return -ENOTSUP;
@@ -502,16 +475,6 @@ static int lsm6dsr_gyro_channel_get(enum sensor_channel chan,
 					data->gyro_sensitivity);
 }
 
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-static void lsm6dsr_gyro_channel_get_temp(struct sensor_value *val,
-					  struct lsm6dsr_data *data)
-{
-	/* val = temp_sample / 256 + 25 */
-	val->val1 = data->temp_sample / 256 + 25;
-	val->val2 = (data->temp_sample % 256) * (1000000 / 256);
-}
-#endif
-
 static int lsm6dsr_channel_get(const struct device *dev,
 			       enum sensor_channel chan,
 			       struct sensor_value *val)
@@ -531,11 +494,6 @@ static int lsm6dsr_channel_get(const struct device *dev,
 	case SENSOR_CHAN_GYRO_XYZ:
 		lsm6dsr_gyro_channel_get(chan, val, data);
 		break;
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-	case SENSOR_CHAN_DIE_TEMP:
-		lsm6dsr_gyro_channel_get_temp(val, data);
-		break;
-#endif
 	default:
 		return -ENOTSUP;
 	}
