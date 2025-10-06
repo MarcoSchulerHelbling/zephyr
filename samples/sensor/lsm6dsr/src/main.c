@@ -11,44 +11,44 @@
 #include <zephyr/sys/util.h>
 
 static int print_samples;
-static int lsm6dsr_trig_cnt;
+// static int lsm6dsr_trig_cnt;
 
 static struct sensor_value accel_x_out, accel_y_out, accel_z_out;
 static struct sensor_value gyro_x_out, gyro_y_out, gyro_z_out;
 
-#ifdef CONFIG_LSM6DSR_TRIGGER
-static void lsm6dsr_trigger_handler(const struct device *dev,
-				    const struct sensor_trigger *trig)
-{
-	static struct sensor_value accel_x, accel_y, accel_z;
-	static struct sensor_value gyro_x, gyro_y, gyro_z;
-	lsm6dsr_trig_cnt++;
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// static void lsm6dsr_trigger_handler(const struct device *dev,
+// 				    const struct sensor_trigger *trig)
+// {
+// 	static struct sensor_value accel_x, accel_y, accel_z;
+// 	static struct sensor_value gyro_x, gyro_y, gyro_z;
+// 	lsm6dsr_trig_cnt++;
 
-	sensor_sample_fetch_chan(dev, SENSOR_CHAN_ACCEL_XYZ);
-	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_X, &accel_x);
-	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_Y, &accel_y);
-	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_Z, &accel_z);
+// 	sensor_sample_fetch_chan(dev, SENSOR_CHAN_ACCEL_XYZ);
+// 	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_X, &accel_x);
+// 	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_Y, &accel_y);
+// 	sensor_channel_get(dev, SENSOR_CHAN_ACCEL_Z, &accel_z);
 
-	/* lsm6dsr gyro */
-	sensor_sample_fetch_chan(dev, SENSOR_CHAN_GYRO_XYZ);
-	sensor_channel_get(dev, SENSOR_CHAN_GYRO_X, &gyro_x);
-	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Y, &gyro_y);
-	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Z, &gyro_z);
+// 	/* lsm6dsr gyro */
+// 	sensor_sample_fetch_chan(dev, SENSOR_CHAN_GYRO_XYZ);
+// 	sensor_channel_get(dev, SENSOR_CHAN_GYRO_X, &gyro_x);
+// 	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Y, &gyro_y);
+// 	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Z, &gyro_z);
 
-	if (print_samples) {
-		print_samples = 0;
+// 	if (print_samples) {
+// 		print_samples = 0;
 
-		accel_x_out = accel_x;
-		accel_y_out = accel_y;
-		accel_z_out = accel_z;
+// 		accel_x_out = accel_x;
+// 		accel_y_out = accel_y;
+// 		accel_z_out = accel_z;
 
-		gyro_x_out = gyro_x;
-		gyro_y_out = gyro_y;
-		gyro_z_out = gyro_z;
-	}
+// 		gyro_x_out = gyro_x;
+// 		gyro_y_out = gyro_y;
+// 		gyro_z_out = gyro_z;
+// 	}
 
-}
-#endif
+// }
+// #endif
 
 int main(void)
 {
@@ -78,17 +78,17 @@ int main(void)
 		return 0;
 	}
 
-#ifdef CONFIG_LSM6DSR_TRIGGER
-	struct sensor_trigger trig;
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// 	struct sensor_trigger trig;
 
-	trig.type = SENSOR_TRIG_DATA_READY;
-	trig.chan = SENSOR_CHAN_ACCEL_XYZ;
+// 	trig.type = SENSOR_TRIG_DATA_READY;
+// 	trig.chan = SENSOR_CHAN_ACCEL_XYZ;
 
-	if (sensor_trigger_set(lsm6dsr_dev, &trig, lsm6dsr_trigger_handler) != 0) {
-		printk("Could not set sensor type and channel\n");
-		return 0;
-	}
-#endif
+// 	if (sensor_trigger_set(lsm6dsr_dev, &trig, lsm6dsr_trigger_handler) != 0) {
+// 		printk("Could not set sensor type and channel\n");
+// 		return 0;
+// 	}
+// #endif
 
 	if (sensor_sample_fetch(lsm6dsr_dev) < 0) {
 		printk("Sensor sample update error\n");
@@ -96,6 +96,19 @@ int main(void)
 	}
 
 	while (1) {
+	/* lsm6dsr gyro */
+	sensor_sample_fetch_chan(lsm6dsr_dev, SENSOR_CHAN_ACCEL_XYZ);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_ACCEL_X, &accel_x_out);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_ACCEL_Y, &accel_y_out);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_ACCEL_Z, &accel_z_out);
+
+	/* lsm6dsr gyro */
+	sensor_sample_fetch_chan(lsm6dsr_dev, SENSOR_CHAN_GYRO_XYZ);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_GYRO_X, &gyro_x_out);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_GYRO_Y, &gyro_y_out);
+	sensor_channel_get(lsm6dsr_dev, SENSOR_CHAN_GYRO_Z, &gyro_z_out);
+
+
 		/* Erase previous */
 		printk("\0033\014");
 		printf("LSM6DSR sensor samples:\n\n");
@@ -114,7 +127,7 @@ int main(void)
 							   sensor_value_to_double(&gyro_z_out));
 		printk("%s\n", out_str);
 
-		printk("loop:%d trig_cnt:%d\n\n", ++cnt, lsm6dsr_trig_cnt);
+		printk("loop:%d\n\n", ++cnt);
 
 		print_samples = 1;
 		k_sleep(K_MSEC(2000));
