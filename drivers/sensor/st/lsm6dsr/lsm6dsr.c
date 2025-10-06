@@ -547,9 +547,9 @@ static int lsm6dsr_channel_get(const struct device *dev,
 
 static DEVICE_API(sensor, lsm6dsr_driver_api) = {
 	.attr_set = lsm6dsr_attr_set,
-#if CONFIG_LSM6DSR_TRIGGER
-	.trigger_set = lsm6dsr_trigger_set,
-#endif
+// #if CONFIG_LSM6DSR_TRIGGER
+// 	.trigger_set = lsm6dsr_trigger_set,
+// #endif
 	.sample_fetch = lsm6dsr_sample_fetch,
 	.channel_get = lsm6dsr_channel_get,
 };
@@ -654,13 +654,13 @@ static int lsm6dsr_init(const struct device *dev)
 		return ret;
 	}
 
-#ifdef CONFIG_LSM6DSR_TRIGGER
-	ret = lsm6dsr_init_interrupt(dev);
-	if (ret < 0) {
-		LOG_ERR("Failed to initialize interrupt.");
-		return ret;
-	}
-#endif
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// 	ret = lsm6dsr_init_interrupt(dev);
+// 	if (ret < 0) {
+// 		LOG_ERR("Failed to initialize interrupt.");
+// 		return ret;
+// 	}
+// #endif
 
 	return 0;
 }
@@ -742,13 +742,13 @@ static int lsm6dsr_pm_action(const struct device *dev,
 /*
  * Instantiation macros used when a device is on a SPI bus.
  */
-
-#ifdef CONFIG_LSM6DSR_TRIGGER
-#define LSM6DSR_CFG_IRQ(inst) \
-		.int_gpio = GPIO_DT_SPEC_INST_GET(inst, irq_gpios),
-#else
+/*
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// #define LSM6DSR_CFG_IRQ(inst) \
+// 		.int_gpio = GPIO_DT_SPEC_INST_GET(inst, irq_gpios),
+// #else */
 #define LSM6DSR_CFG_IRQ(inst)
-#endif /* CONFIG_LSM6DSR_TRIGGER */
+// #endif /* CONFIG_LSM6DSR_TRIGGER */
 
 #define LSM6DSR_CONFIG_SPI(inst)						\
 	{									\
