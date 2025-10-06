@@ -622,9 +622,9 @@ union lsm6dsr_bus_cfg {
 struct lsm6dsr_config {
 	int (*bus_init)(const struct device *dev);
 	const union lsm6dsr_bus_cfg bus_cfg;
-#ifdef CONFIG_LSM6DSR_TRIGGER
-	struct gpio_dt_spec int_gpio;
-#endif
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// 	struct gpio_dt_spec int_gpio;
+// #endif
 };
 
 struct lsm6dsr_data;
@@ -656,33 +656,33 @@ struct lsm6dsr_data {
 	uint16_t accel_freq;
 	uint16_t gyro_freq;
 
-#ifdef CONFIG_LSM6DSR_TRIGGER
-	const struct device *dev;
-	struct gpio_callback gpio_cb;
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// 	const struct device *dev;
+// 	struct gpio_callback gpio_cb;
 
-	const struct sensor_trigger *data_ready_trigger;
-	sensor_trigger_handler_t data_ready_handler;
+// 	const struct sensor_trigger *data_ready_trigger;
+// 	sensor_trigger_handler_t data_ready_handler;
 
-#if defined(CONFIG_LSM6DSR_TRIGGER_OWN_THREAD)
-	K_KERNEL_STACK_MEMBER(thread_stack, CONFIG_LSM6DSR_THREAD_STACK_SIZE);
-	struct k_thread thread;
-	struct k_sem gpio_sem;
-#elif defined(CONFIG_LSM6DSR_TRIGGER_GLOBAL_THREAD)
-	struct k_work work;
-#endif
+// #if defined(CONFIG_LSM6DSR_TRIGGER_OWN_THREAD)
+// 	K_KERNEL_STACK_MEMBER(thread_stack, CONFIG_LSM6DSR_THREAD_STACK_SIZE);
+// 	struct k_thread thread;
+// 	struct k_sem gpio_sem;
+// #elif defined(CONFIG_LSM6DSR_TRIGGER_GLOBAL_THREAD)
+// 	struct k_work work;
+// #endif
 
-#endif /* CONFIG_LSM6DSR_TRIGGER */
+// #endif /* CONFIG_LSM6DSR_TRIGGER */
 };
 
 int lsm6dsr_spi_init(const struct device *dev);
 int lsm6dsr_i2c_init(const struct device *dev);
 
-#ifdef CONFIG_LSM6DSR_TRIGGER
-int lsm6dsr_trigger_set(const struct device *dev,
-			const struct sensor_trigger *trig,
-			sensor_trigger_handler_t handler);
+// #ifdef CONFIG_LSM6DSR_TRIGGER
+// int lsm6dsr_trigger_set(const struct device *dev,
+// 			const struct sensor_trigger *trig,
+// 			sensor_trigger_handler_t handler);
 
-int lsm6dsr_init_interrupt(const struct device *dev);
-#endif
+// int lsm6dsr_init_interrupt(const struct device *dev);
+// #endif
 
 #endif /* ZEPHYR_DRIVERS_SENSOR_LSM6DSR_LSM6DSR_H_ */
