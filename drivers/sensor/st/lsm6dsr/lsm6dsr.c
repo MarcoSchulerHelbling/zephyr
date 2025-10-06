@@ -18,7 +18,6 @@
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/__assert.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/pm/device.h>
 
 #include "lsm6dsr.h"
 
@@ -27,8 +26,7 @@ LOG_MODULE_REGISTER(LSM6DSR, CONFIG_SENSOR_LOG_LEVEL);
 static const uint16_t lsm6dsr_odr_map[] = {0, 12, 26, 52, 104, 208, 416, 833,
 					1666, 3332, 6664, 1};
 
-#if defined(LSM6DSR_ACCEL_ODR_RUNTIME) || defined(LSM6DSR_GYRO_ODR_RUNTIME) ||\
-	defined(CONFIG_PM_DEVICE)
+#if defined(LSM6DSR_ACCEL_ODR_RUNTIME) || defined(LSM6DSR_GYRO_ODR_RUNTIME)
 static int lsm6dsr_freq_to_odr_val(uint16_t freq)
 {
 	size_t i;
@@ -654,60 +652,6 @@ static int lsm6dsr_init(const struct device *dev)
 	return 0;
 }
 
-#ifdef CONFIG_PM_DEVICE
-static int lsm6dsr_pm_action(const struct device *dev,
-			     enum pm_device_action action)
-{
-	struct lsm6dsr_data *data = dev->data;
-	int ret = -EIO;
-	uint8_t accel_odr = 0;
-	uint8_t gyro_odr = 0;
-
-	switch (action) {
-	case PM_DEVICE_ACTION_RESUME:
-		/* Restore saved ODR values */
-		accel_odr = lsm6dsr_freq_to_odr_val(data->accel_freq);
-		ret = lsm6dsr_accel_set_odr_raw(dev, accel_odr);
-		if (ret < 0) {
-			LOG_ERR("Failed to resume accelerometer");
-			break;
-		}
-		gyro_odr = lsm6dsr_freq_to_odr_val(data->gyro_freq);
-		ret = lsm6dsr_gyro_set_odr_raw(dev, gyro_odr);
-		if (ret < 0) {
-			LOG_ERR("Failed to resume gyro");
-			break;
-		}
-		break;
-	case PM_DEVICE_ACTION_SUSPEND:
-		/*
-		 * Set accelerometer ODR to power-down. Don't use the direct
-		 * function to not overwrite the saved value
-		 */
-		ret = data->hw_tf->update_reg(dev, LSM6DSR_REG_CTRL1_XL,
-					      LSM6DSR_MASK_CTRL1_XL_ODR_XL, 0);
-		if (ret < 0) {
-			LOG_ERR("Failed to suspend accelerometer");
-			break;
-		}
-		/* Set gyro ODR to power-down */
-		ret = data->hw_tf->update_reg(dev, LSM6DSR_REG_CTRL2_G,
-					      LSM6DSR_MASK_CTRL2_G_ODR_G, 0);
-		if (ret < 0) {
-			LOG_ERR("Failed to suspend gyro");
-			break;
-		}
-
-		break;
-	default:
-		return -ENOTSUP;
-	}
-
-	return ret;
-}
-#endif
-
-
 #if DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 0
 #warning "LSM6DSR driver enabled without any devices"
 #endif
@@ -718,10 +662,9 @@ static int lsm6dsr_pm_action(const struct device *dev,
  */
 
 #define LSM6DSR_DEVICE_INIT(inst)					\
-	PM_DEVICE_DT_INST_DEFINE(inst, lsm6dsr_pm_action);		\
 	SENSOR_DEVICE_DT_INST_DEFINE(inst,				\
 			    lsm6dsr_init,				\
-			    PM_DEVICE_DT_INST_GET(inst),		\
+			    NULL,					\
 			    &lsm6dsr_data_##inst,			\
 			    &lsm6dsr_config_##inst,			\
 			    POST_KERNEL,				\
