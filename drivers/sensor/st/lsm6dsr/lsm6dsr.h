@@ -646,9 +646,6 @@ struct lsm6dsr_data {
 	int gyro_sample_y;
 	int gyro_sample_z;
 	float gyro_sensitivity;
-#if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
-	int temp_sample;
-#endif
 	const struct lsm6dsr_transfer_function *hw_tf;
 	uint16_t accel_freq;
 	uint16_t gyro_freq;
