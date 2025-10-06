@@ -16,11 +16,6 @@ menuconfig LSM6DSR
 
 if LSM6DSR
 
-config LSM6DSR_ENABLE_TEMP
-	bool "Temperature"
-	help
-	  Enable/disable temperature
-
 menu "Attributes"
 
 config LSM6DSR_GYRO_FS
