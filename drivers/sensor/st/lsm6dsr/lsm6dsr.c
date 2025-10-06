@@ -381,48 +381,6 @@ static int lsm6dsr_sample_fetch_temp(const struct device *dev)
 }
 #endif
 
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-static int lsm6dsr_sample_fetch_magn(const struct device *dev)
-{
-	struct lsm6dsr_data *data = dev->data;
-	uint8_t buf[6];
-
-	if (lsm6dsr_shub_read_external_chip(dev, buf, sizeof(buf)) < 0) {
-		LOG_DBG("failed to read ext mag sample");
-		return -EIO;
-	}
-
-	data->magn_sample_x = (int16_t)((uint16_t)(buf[0]) |
-				((uint16_t)(buf[1]) << 8));
-	data->magn_sample_y = (int16_t)((uint16_t)(buf[2]) |
-				((uint16_t)(buf[3]) << 8));
-	data->magn_sample_z = (int16_t)((uint16_t)(buf[4]) |
-				((uint16_t)(buf[5]) << 8));
-
-	return 0;
-}
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-static int lsm6dsr_sample_fetch_press(const struct device *dev)
-{
-	struct lsm6dsr_data *data = dev->data;
-	uint8_t buf[5];
-
-	if (lsm6dsr_shub_read_external_chip(dev, buf, sizeof(buf)) < 0) {
-		LOG_DBG("failed to read ext press sample");
-		return -EIO;
-	}
-
-	data->sample_press = (int32_t)((uint32_t)(buf[0]) |
-				     ((uint32_t)(buf[1]) << 8) |
-				     ((uint32_t)(buf[2]) << 16));
-	data->sample_temp = (int16_t)((uint16_t)(buf[3]) |
-				     ((uint16_t)(buf[4]) << 8));
-
-	return 0;
-}
-#endif
-
 static int lsm6dsr_sample_fetch(const struct device *dev,
 				enum sensor_channel chan)
 {
@@ -438,28 +396,11 @@ static int lsm6dsr_sample_fetch(const struct device *dev,
 		lsm6dsr_sample_fetch_temp(dev);
 		break;
 #endif
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-	case SENSOR_CHAN_MAGN_XYZ:
-		lsm6dsr_sample_fetch_magn(dev);
-		break;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-	case SENSOR_CHAN_AMBIENT_TEMP:
-	case SENSOR_CHAN_PRESS:
-		lsm6dsr_sample_fetch_press(dev);
-		break;
-#endif
 	case SENSOR_CHAN_ALL:
 		lsm6dsr_sample_fetch_accel(dev);
 		lsm6dsr_sample_fetch_gyro(dev);
 #if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
 		lsm6dsr_sample_fetch_temp(dev);
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-		lsm6dsr_sample_fetch_magn(dev);
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-		lsm6dsr_sample_fetch_press(dev);
 #endif
 		break;
 	default:
@@ -573,84 +514,6 @@ static void lsm6dsr_gyro_channel_get_temp(struct sensor_value *val,
 }
 #endif
 
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-static inline void lsm6dsr_magn_convert(struct sensor_value *val, int raw_val,
-					float sensitivity)
-{
-	double dval;
-
-	/* Sensitivity is exposed in mgauss/LSB */
-	dval = (double)(raw_val * sensitivity);
-	val->val1 = (int32_t)dval / 1000000;
-	val->val2 = (int32_t)dval % 1000000;
-}
-
-static inline int lsm6dsr_magn_get_channel(enum sensor_channel chan,
-					   struct sensor_value *val,
-					   struct lsm6dsr_data *data)
-{
-	switch (chan) {
-	case SENSOR_CHAN_MAGN_X:
-		lsm6dsr_magn_convert(val,
-				     data->magn_sample_x,
-				     data->magn_sensitivity);
-		break;
-	case SENSOR_CHAN_MAGN_Y:
-		lsm6dsr_magn_convert(val,
-				     data->magn_sample_y,
-				     data->magn_sensitivity);
-		break;
-	case SENSOR_CHAN_MAGN_Z:
-		lsm6dsr_magn_convert(val,
-				     data->magn_sample_z,
-				     data->magn_sensitivity);
-		break;
-	case SENSOR_CHAN_MAGN_XYZ:
-		lsm6dsr_magn_convert(val,
-				     data->magn_sample_x,
-				     data->magn_sensitivity);
-		lsm6dsr_magn_convert(val + 1,
-				     data->magn_sample_y,
-				     data->magn_sensitivity);
-		lsm6dsr_magn_convert(val + 2,
-				     data->magn_sample_z,
-				     data->magn_sensitivity);
-		break;
-	default:
-		return -ENOTSUP;
-	}
-
-	return 0;
-}
-
-static int lsm6dsr_magn_channel_get(enum sensor_channel chan,
-				    struct sensor_value *val,
-				    struct lsm6dsr_data *data)
-{
-	return lsm6dsr_magn_get_channel(chan, val, data);
-}
-#endif
-
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-static inline void lps22hb_press_convert(struct sensor_value *val,
-					 int32_t raw_val)
-{
-	/* Pressure sensitivity is 4096 LSB/hPa */
-	/* Convert raw_val to val in kPa */
-	val->val1 = (raw_val >> 12) / 10;
-	val->val2 = (raw_val >> 12) % 10 * 100000 +
-		(((int32_t)((raw_val) & 0x0FFF) * 100000L) >> 12);
-}
-
-static inline void lps22hb_temp_convert(struct sensor_value *val,
-					int16_t raw_val)
-{
-	/* Temperature sensitivity is 100 LSB/deg C */
-	val->val1 = raw_val / 100;
-	val->val2 = (int32_t)raw_val % 100 * (10000);
-}
-#endif
-
 static int lsm6dsr_channel_get(const struct device *dev,
 			       enum sensor_channel chan,
 			       struct sensor_value *val)
@@ -673,23 +536,6 @@ static int lsm6dsr_channel_get(const struct device *dev,
 #if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
 	case SENSOR_CHAN_DIE_TEMP:
 		lsm6dsr_gyro_channel_get_temp(val, data);
-		break;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-	case SENSOR_CHAN_MAGN_X:
-	case SENSOR_CHAN_MAGN_Y:
-	case SENSOR_CHAN_MAGN_Z:
-	case SENSOR_CHAN_MAGN_XYZ:
-		lsm6dsr_magn_channel_get(chan, val, data);
-		break;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-	case SENSOR_CHAN_PRESS:
-		lps22hb_press_convert(val, data->sample_press);
-		break;
-
-	case SENSOR_CHAN_AMBIENT_TEMP:
-		lps22hb_temp_convert(val, data->sample_temp);
 		break;
 #endif
 	default:
@@ -812,14 +658,6 @@ static int lsm6dsr_init(const struct device *dev)
 	ret = lsm6dsr_init_interrupt(dev);
 	if (ret < 0) {
 		LOG_ERR("Failed to initialize interrupt.");
-		return ret;
-	}
-#endif
-
-#ifdef CONFIG_LSM6DSR_SENSORHUB
-	ret = lsm6dsr_shub_init_external_chip(dev);
-	if (ret < 0) {
-		LOG_ERR("Failed to initialize external chip");
 		return ret;
 	}
 #endif
