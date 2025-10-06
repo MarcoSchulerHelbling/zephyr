@@ -25,10 +25,10 @@
 #include <zephyr/drivers/i2c.h>
 #endif /* DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) */
 
-#define LSM6DSR_REG_FIFO_CTRL5				0x0A
-#define LSM6DSR_MASK_FIFO_CTRL5_FIFO_MODE		(BIT(2) | BIT(1) | \
+#define LSM6DSR_REG_FIFO_CTRL4				0x0A
+#define LSM6DSR_MASK_FIFO_CTRL4_FIFO_MODE		(BIT(2) | BIT(1) | \
 							 BIT(0))
-#define LSM6DSR_SHIFT_FIFO_CTRL5_FIFO_MODE		0
+#define LSM6DSR_SHIFT_FIFO_CTRL4_FIFO_MODE		0
 
 #define LSM6DSR_REG_WHO_AM_I				0x0F
 #define LSM6DSR_VAL_WHO_AM_I				0x6B
