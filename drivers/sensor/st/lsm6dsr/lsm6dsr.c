@@ -552,9 +552,9 @@ static int lsm6dsr_init_chip(const struct device *dev)
 	}
 
 	if (data->hw_tf->update_reg(dev,
-				LSM6DSR_REG_FIFO_CTRL5,
-				LSM6DSR_MASK_FIFO_CTRL5_FIFO_MODE,
-				0 << LSM6DSR_SHIFT_FIFO_CTRL5_FIFO_MODE) < 0) {
+				LSM6DSR_REG_FIFO_CTRL4,
+				LSM6DSR_MASK_FIFO_CTRL4_FIFO_MODE,
+				0 << LSM6DSR_SHIFT_FIFO_CTRL4_FIFO_MODE) < 0) {
 		LOG_DBG("failed to set FIFO mode");
 		return -EIO;
 	}
