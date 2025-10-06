@@ -15,12 +15,6 @@ static int lsm6dsr_trig_cnt;
 
 static struct sensor_value accel_x_out, accel_y_out, accel_z_out;
 static struct sensor_value gyro_x_out, gyro_y_out, gyro_z_out;
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL)
-static struct sensor_value magn_x_out, magn_y_out, magn_z_out;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-static struct sensor_value press_out, temp_out;
-#endif
 
 #ifdef CONFIG_LSM6DSR_TRIGGER
 static void lsm6dsr_trigger_handler(const struct device *dev,
@@ -28,12 +22,6 @@ static void lsm6dsr_trigger_handler(const struct device *dev,
 {
 	static struct sensor_value accel_x, accel_y, accel_z;
 	static struct sensor_value gyro_x, gyro_y, gyro_z;
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL)
-	static struct sensor_value magn_x, magn_y, magn_z;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-	static struct sensor_value press, temp;
-#endif
 	lsm6dsr_trig_cnt++;
 
 	sensor_sample_fetch_chan(dev, SENSOR_CHAN_ACCEL_XYZ);
@@ -47,23 +35,6 @@ static void lsm6dsr_trigger_handler(const struct device *dev,
 	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Y, &gyro_y);
 	sensor_channel_get(dev, SENSOR_CHAN_GYRO_Z, &gyro_z);
 
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL)
-	/* lsm6dsr external magn */
-	sensor_sample_fetch_chan(dev, SENSOR_CHAN_MAGN_XYZ);
-	sensor_channel_get(dev, SENSOR_CHAN_MAGN_X, &magn_x);
-	sensor_channel_get(dev, SENSOR_CHAN_MAGN_Y, &magn_y);
-	sensor_channel_get(dev, SENSOR_CHAN_MAGN_Z, &magn_z);
-#endif
-
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-	/* lsm6dsr external press/temp */
-	sensor_sample_fetch_chan(dev, SENSOR_CHAN_PRESS);
-	sensor_channel_get(dev, SENSOR_CHAN_PRESS, &press);
-
-	sensor_sample_fetch_chan(dev, SENSOR_CHAN_AMBIENT_TEMP);
-	sensor_channel_get(dev, SENSOR_CHAN_AMBIENT_TEMP, &temp);
-#endif
-
 	if (print_samples) {
 		print_samples = 0;
 
@@ -74,17 +45,6 @@ static void lsm6dsr_trigger_handler(const struct device *dev,
 		gyro_x_out = gyro_x;
 		gyro_y_out = gyro_y;
 		gyro_z_out = gyro_z;
-
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL)
-		magn_x_out = magn_x;
-		magn_y_out = magn_y;
-		magn_z_out = magn_z;
-#endif
-
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-		press_out = press;
-		temp_out = temp;
-#endif
 	}
 
 }
@@ -153,22 +113,6 @@ int main(void)
 							   sensor_value_to_double(&gyro_y_out),
 							   sensor_value_to_double(&gyro_z_out));
 		printk("%s\n", out_str);
-
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL)
-		/* lsm6dsr external magn */
-		sprintf(out_str, "magn x:%f gauss y:%f gauss z:%f gauss",
-							   sensor_value_to_double(&magn_x_out),
-							   sensor_value_to_double(&magn_y_out),
-							   sensor_value_to_double(&magn_z_out));
-		printk("%s\n", out_str);
-#endif
-
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-		/* lsm6dsr external press/temp */
-		sprintf(out_str, "press: %f kPa - temp: %f deg",
-			sensor_value_to_double(&press_out), sensor_value_to_double(&temp_out));
-		printk("%s\n", out_str);
-#endif
 
 		printk("loop:%d trig_cnt:%d\n\n", ++cnt, lsm6dsr_trig_cnt);
 
