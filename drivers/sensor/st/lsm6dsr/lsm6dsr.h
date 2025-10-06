@@ -652,16 +652,6 @@ struct lsm6dsr_data {
 #if defined(CONFIG_LSM6DSR_ENABLE_TEMP)
 	int temp_sample;
 #endif
-#if defined(CONFIG_LSM6DSR_EXT0_LIS2MDL) || defined(CONFIG_LSM6DSR_EXT0_LIS3MDL)
-	int magn_sample_x;
-	int magn_sample_y;
-	int magn_sample_z;
-	float magn_sensitivity;
-#endif
-#if defined(CONFIG_LSM6DSR_EXT0_LPS22HB)
-	int sample_press;
-	int sample_temp;
-#endif
 	const struct lsm6dsr_transfer_function *hw_tf;
 	uint16_t accel_freq;
 	uint16_t gyro_freq;
@@ -686,11 +676,6 @@ struct lsm6dsr_data {
 
 int lsm6dsr_spi_init(const struct device *dev);
 int lsm6dsr_i2c_init(const struct device *dev);
-#if defined(CONFIG_LSM6DSR_SENSORHUB)
-int lsm6dsr_shub_init_external_chip(const struct device *dev);
-int lsm6dsr_shub_read_external_chip(const struct device *dev, uint8_t *buf,
-				    uint8_t len);
-#endif
 
 #ifdef CONFIG_LSM6DSR_TRIGGER
 int lsm6dsr_trigger_set(const struct device *dev,

@@ -60,28 +60,6 @@ config LSM6DSR_ENABLE_TEMP
 	help
 	  Enable/disable temperature
 
-config LSM6DSR_SENSORHUB
-	bool "I2C sensorhub feature"
-	help
-	  Enable/disable internal sensorhub
-
-choice LSM6DSR_EXTERNAL_SENSOR_0
-	prompt "External sensor 0"
-	depends on LSM6DSR_SENSORHUB
-	help
-	  Choose the external sensor 0 connected to LSM6DS3.
-
-config LSM6DSR_EXT0_LIS2MDL
-	bool "LIS2MDL"
-
-config LSM6DSR_EXT0_LIS3MDL
-	bool "LIS3MDL"
-
-config LSM6DSR_EXT0_LPS22HB
-	bool "LPS22HB"
-
-endchoice
-
 menu "Attributes"
 
 config LSM6DSR_GYRO_FS
