@@ -72,8 +72,12 @@ static int lsm6dsr_accel_range_to_fs_val(int32_t range)
 #endif
 
 #ifdef LSM6DSR_GYRO_FS_RUNTIME
-static const uint16_t lsm6dsr_gyro_fs_map[] = {250, 500, 1000, 2000, 125};
-static const uint16_t lsm6dsr_gyro_fs_sens[] = {2, 4, 8, 16, 1};
+static const uint16_t lsm6dsr_gyro_fs_map[] = {250, 500, 1000, 2000, 125, 4000};
+static const uint16_t lsm6dsr_gyro_fs_sens[] = {2, 4, 8, 16, 1, 32};
+
+/* Indexes in maps of the two specially treated bits for gyro full scale */
+#define GYRO_FULLSCALE_125 4
+#define GYRO_FULLSCALE_4000 5
 
 static int lsm6dsr_gyro_range_to_fs_val(int32_t range)
 {
@@ -142,8 +146,15 @@ static int lsm6dsr_gyro_set_fs_raw(const struct device *dev, uint8_t fs)
 	if (fs == GYRO_FULLSCALE_125) {
 		if (data->hw_tf->update_reg(dev,
 					LSM6DSR_REG_CTRL2_G,
-					LSM6DSR_MASK_CTRL2_FS125 | LSM6DSR_MASK_CTRL2_G_FS_G,
+					LSM6DSR_MASK_CTRL2_FS4000 | LSM6DSR_MASK_CTRL2_FS125 | LSM6DSR_MASK_CTRL2_G_FS_G,
 					1 << LSM6DSR_SHIFT_CTRL2_FS125) < 0) {
+			return -EIO;
+		}
+	} else if (fs == GYRO_FULLSCALE_4000) {
+		if (data->hw_tf->update_reg(dev,
+					LSM6DSR_REG_CTRL2_G,
+					LSM6DSR_MASK_CTRL2_FS4000 | LSM6DSR_MASK_CTRL2_FS125 | LSM6DSR_MASK_CTRL2_G_FS_G,
+					1 << LSM6DSR_SHIFT_CTRL2_FS4000) < 0) {
 			return -EIO;
 		}
 	} else {
@@ -325,7 +336,7 @@ static int lsm6dsr_sample_fetch_accel(const struct device *dev)
 
 	if (data->hw_tf->read_data(dev, LSM6DSR_REG_OUTX_L_XL,
 				   buf, sizeof(buf)) < 0) {
-		LOG_DBG("failed to read sample");
+		LOG_DBG("failed to read accel sample");
 		return -EIO;
 	}
 
@@ -346,7 +357,7 @@ static int lsm6dsr_sample_fetch_gyro(const struct device *dev)
 
 	if (data->hw_tf->read_data(dev, LSM6DSR_REG_OUTX_L_G,
 				   buf, sizeof(buf)) < 0) {
-		LOG_DBG("failed to read sample");
+		LOG_DBG("failed to read gyro sample");
 		return -EIO;
 	}
 
@@ -522,7 +533,7 @@ static int lsm6dsr_init_chip(const struct device *dev)
 		return -EIO;
 	}
 	if (chip_id != LSM6DSR_VAL_WHO_AM_I) {
-		LOG_DBG("invalid chip id 0x%x", chip_id);
+	  LOG_DBG("invalid chip id 0x%x (expected 0x%x)", chip_id, LSM6DSR_REG_WHO_AM_I);
 		return -EIO;
 	}
 
@@ -551,6 +562,7 @@ static int lsm6dsr_init_chip(const struct device *dev)
 		return -EIO;
 	}
 
+	/* Configure FIFO: Bypass mode --> FIFO disabled */
 	if (data->hw_tf->update_reg(dev,
 				LSM6DSR_REG_FIFO_CTRL4,
 				LSM6DSR_MASK_FIFO_CTRL4_FIFO_MODE,
@@ -559,18 +571,26 @@ static int lsm6dsr_init_chip(const struct device *dev)
 		return -EIO;
 	}
 
+	/* Configure:
+	   - BDU: Disable Block data update --> continous update
+	   - Bit 1: Must be set to zero for the correct operation of the device
+	   - IF_INC: Enable auto increment during multiple byte access (burst)
+	 */
 	if (data->hw_tf->update_reg(dev,
 				    LSM6DSR_REG_CTRL3_C,
 				    LSM6DSR_MASK_CTRL3_C_BDU |
-				    LSM6DSR_MASK_CTRL3_C_BLE |
+				    LSM6DSR_MASK_CTRL3_C_MUST_BE_ZERO |
 				    LSM6DSR_MASK_CTRL3_C_IF_INC,
 				    (1 << LSM6DSR_SHIFT_CTRL3_C_BDU) |
-				    (0 << LSM6DSR_SHIFT_CTRL3_C_BLE) |
+				    (0 << LSM6DSR_SHIFT_CTRL3_C_MUST_BE_ZERO) |
 				    (1 << LSM6DSR_SHIFT_CTRL3_C_IF_INC)) < 0) {
-		LOG_DBG("failed to set BDU, BLE and burst");
+		LOG_DBG("failed to set BDU, MUST_BE_ZERO and burst");
 		return -EIO;
 	}
 
+	/* Configure:
+	   - Disable high performance operation mode for accelerometer
+	 */
 	if (data->hw_tf->update_reg(dev,
 				    LSM6DSR_REG_CTRL6_C,
 				    LSM6DSR_MASK_CTRL6_C_XL_HM_MODE,
@@ -579,6 +599,9 @@ static int lsm6dsr_init_chip(const struct device *dev)
 		return -EIO;
 	}
 
+	/* Configure:
+	   - Disable high performance operation mode for gyro
+	 */
 	if (data->hw_tf->update_reg(dev,
 				    LSM6DSR_REG_CTRL7_G,
 				    LSM6DSR_MASK_CTRL7_G_HM_MODE,
