@@ -31,6 +31,7 @@ config LSM6DSR_GYRO_FS
 	  500:   +/- 500dps
 	  1000:  +/- 1000dps
 	  2000:  +/- 2000dps
+	  4000:  +/- 4000dps
 
 config LSM6DSR_GYRO_ODR
 	int "Gyroscope Output data rate frequency"

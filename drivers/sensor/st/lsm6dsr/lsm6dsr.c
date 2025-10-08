@@ -137,26 +137,33 @@ static int lsm6dsr_gyro_set_fs_raw(const struct device *dev, uint8_t fs)
 {
 	struct lsm6dsr_data *data = dev->data;
 
-	if (fs == GYRO_FULLSCALE_125) {
+	switch (fs) {
+	case GYRO_FULLSCALE_125: {
 		if (data->hw_tf->update_reg(dev, LSM6DSR_REG_CTRL2_G,
 					    LSM6DSR_MASK_CTRL2_FS4000 | LSM6DSR_MASK_CTRL2_FS125 |
 						    LSM6DSR_MASK_CTRL2_G_FS_G,
 					    1 << LSM6DSR_SHIFT_CTRL2_FS125) < 0) {
 			return -EIO;
 		}
-	} else if (fs == GYRO_FULLSCALE_4000) {
+		break;
+	}
+	case GYRO_FULLSCALE_4000: {
 		if (data->hw_tf->update_reg(dev, LSM6DSR_REG_CTRL2_G,
 					    LSM6DSR_MASK_CTRL2_FS4000 | LSM6DSR_MASK_CTRL2_FS125 |
 						    LSM6DSR_MASK_CTRL2_G_FS_G,
 					    1 << LSM6DSR_SHIFT_CTRL2_FS4000) < 0) {
 			return -EIO;
 		}
-	} else {
+		break;
+	}
+	default: {
 		if (data->hw_tf->update_reg(dev, LSM6DSR_REG_CTRL2_G,
 					    LSM6DSR_MASK_CTRL2_FS125 | LSM6DSR_MASK_CTRL2_G_FS_G,
 					    fs << LSM6DSR_SHIFT_CTRL2_G_FS_G) < 0) {
 			return -EIO;
 		}
+		break;
+	}
 	}
 
 	return 0;
