@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 STMicroelectronics
+ * Copyright (c) 2025 Helbling Technik AG
  *
  * SPDX-License-Identifier: Apache-2.0
  */

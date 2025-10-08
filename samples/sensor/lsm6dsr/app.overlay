@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2025 Helbling Technik AG
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 &i2c0 {
 	lsm6dsr: lsm6dsr@6b {
 		compatible = "st,lsm6dsr";
