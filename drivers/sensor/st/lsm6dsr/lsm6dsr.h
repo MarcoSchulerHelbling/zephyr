@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright (c) 2017 Linaro Limited
+ * Copyright (c) 2025 Helbling Technik AG
  *
  * SPDX-License-Identifier: Apache-2.0
  */
