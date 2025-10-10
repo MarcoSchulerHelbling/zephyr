@@ -1,0 +1,10 @@
+# Copyright (c) 2025 Helbling Technik AG
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+    STMicroelectronics H3LSI331DL IMU sensor
+    accessed through I2C bus
+
+compatible: "st,h3lis331dl"
+
+include: ["i2c-device.yaml", "st,h3lis331dl-common.yaml"]

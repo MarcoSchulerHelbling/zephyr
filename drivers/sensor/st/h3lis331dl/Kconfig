@@ -1,0 +1,20 @@
+# ST Microelectronics H3LIS331DL IMU sensor driver
+
+# Copyright (c) 2025 Helbling TEchnik AG
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig H3LIS331DL
+	bool "H3LIS331DL I2C/SPI accelerometer and gyroscope Chip"
+	default y
+	depends on DT_HAS_ST_H3LIS331DL_ENABLED
+	depends on ZEPHYR_HAL_ST_MODULE
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_ST_H3LIS331DL),i2c)
+	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_ST_H3LIS331DL),spi)
+	select HAS_STMEMSC
+	select USE_STDC_H3LIS331DL
+	help
+	  Enable driver for H3LIS331DL accelerometer sensor.
+
+if H3LIS331DL
+
+endif # H3LIS331DL
